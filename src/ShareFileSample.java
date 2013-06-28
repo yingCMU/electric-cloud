@@ -141,6 +141,43 @@ public class ShareFileSample
 	}
 	
 	/**
+	 * Create a folder 
+     *
+     * Currently prints out id, filename, creationdate, type.
+     *authid<s>
+id<s> or path<s>
+name<s>
+	 * @param path folder "/Clients/Jimbo"
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public void folderCreate(String path, String name)
+	throws MalformedURLException, IOException, ParseException
+	{
+		if (path.isEmpty() || path == null) {
+			path = "/";
+		}
+
+		HashMap<String, Object> requiredParameters = new HashMap<String, Object>();
+		requiredParameters.put("path", path);
+		requiredParameters.put("name", name);
+
+		String url = this.buildUrl("folder", "create", requiredParameters);
+		System.out.println(url);
+
+		JSONObject jsonObj = this.invokeShareFileOperation(url);
+		boolean error = (boolean) jsonObj.get("error");
+		if (!error) {
+			System.out.println("folder id : " +jsonObj.get("value"));
+		}
+		else {
+			long errorCode = (long) jsonObj.get("errorCode");
+			String errorMessage = (String) jsonObj.get("errorMessage");
+			System.out.println(errorCode + " : " + errorMessage);
+		}
+	}
+	/**
 	 * Uploads a file to ShareFile.
 	 * 
 	 * @param localPath full path to local file like "c:\\path\\to\\file.txt"
@@ -297,6 +334,43 @@ public class ShareFileSample
 		}		
 	}	
 
+	
+	/**
+	 * Creates a distribution group in ShareFile.
+	 * 
+	 * Ex: to create a group and add users to it at the same time
+	 * 
+	 * optionalParameters.put("isshared", true);
+	 * optionalParameters.put("contacts", "an@email.address,another@email.address");
+	 * sample.groupCreate("MyGroupName", optionalParameters);
+	 * 
+	 * @param name
+	 * @param optionalParameters HashMap of optional parameter names/values
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public void addContact2Group(String contacts, HashMap<String, Object> optionalParameters)
+	throws MalformedURLException, IOException, ParseException
+	{
+		HashMap<String, Object> requiredParameters = new HashMap<String, Object>();
+		requiredParameters.put("contacts", contacts);
+		
+		String url = this.buildUrl("group", "addcontacts", requiredParameters, optionalParameters);
+		System.out.println(url);
+
+		JSONObject jsonObj = this.invokeShareFileOperation(url);
+		boolean error = (boolean) jsonObj.get("error");
+		if (!error) {
+			//System.out.println(jsonObj.get("value"));
+			System.out.println(jsonObj.get("value"));
+		}
+		else {
+			long errorCode = (long) jsonObj.get("errorCode");
+			String errorMessage = (String) jsonObj.get("errorMessage");
+			System.out.println(errorCode + " : " + errorMessage);
+		}			
+	}
 	/**
 	 * Creates a distribution group in ShareFile.
 	 * 
@@ -332,7 +406,36 @@ public class ShareFileSample
 			System.out.println(errorCode + " : " + errorMessage);
 		}			
 	}
+	public void groupList()
+			throws MalformedURLException, IOException, ParseException
+			{
+				
 
+				HashMap<String, Object> requiredParameters = new HashMap<String, Object>();
+				
+
+				String url = this.buildUrl("group", "list", requiredParameters);
+				System.out.println(url);
+
+				JSONObject jsonObj = this.invokeShareFileOperation(url);
+				boolean error = (boolean) jsonObj.get("error");
+				if (!error) {
+					JSONArray items = (JSONArray) jsonObj.get("value");
+					if (items.isEmpty()) {
+						System.out.println("No 	Results");
+					}
+					Iterator<?> iterItems = items.iterator();
+					while (iterItems.hasNext()) {
+						JSONObject item = (JSONObject) iterItems.next();
+						System.out.println(item.get("id")+" "+item.get("filename")+" "+item.get("creationdate")+" "+item.get("type"));
+					}
+				}
+				else {
+					long errorCode = (long) jsonObj.get("errorCode");
+					String errorMessage = (String) jsonObj.get("errorMessage");
+					System.out.println(errorCode + " : " + errorMessage);
+				}
+			}
 	/**
 	 * Searches for items in ShareFile.
 	 * 
